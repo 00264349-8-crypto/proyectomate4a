@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión Multiplicación - Control de Escotilla</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Secular One', 'Arial Black', sans-serif; /* Un font tipo juego */
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* IMAGEN DE FONDO PROPORCIONADA */
+            background-image: url('interfaz.png'); /* Asegúrate de que el archivo se llame interfaz.png */
+            background-size: contain; /* Para que encaje bien en cualquier pantalla */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #0d1b2a; /* Fondo oscuro por si acaso */
+            color: white;
+        }
+
+        /* Contenedor principal que se superpone a la imagen */
+        #game-container {
+            position: relative;
+            width: 1280px; /* Tamaño de la imagen original */
+            height: 720px;
+            pointer-events: none; /* No interceptar clics por defecto */
+        }
+
+        /* Activar pointer events para los elementos hijos interactivos */
+        #game-container * {
+            pointer-events: auto;
+        }
+
+        /* --- Estilos para los Marcadores Textuales --- */
+        .text-display {
+            position: absolute;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-weight: bold;
+        }
+        
+        /* Marcador de PUNTOS (arriba izquierda) */
+        #puntos-display {
+            left: 88px;
+            top: 68px;
+            font-size: 36px;
+            color: #ffffff;
+        }
+
+        /* Marcador de NIVEL (arriba derecha) */
+        #nivel-display {
+            left: 1060px;
+            top: 70px;
+            font-size: 32px;
+            color: #ffffff;
+        }
+
+        /* --- Estilos para la Zona Central (Retos) --- */
+        #central-area {
+            position: absolute;
+            left: 168px;
+            top: 322px;
+            width: 900px;
+            height: 295px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            /* background: rgba(255,255,255,0.05);  border: 2px solid white; /* Descomentar para debug */
+        }
+
+        #operacion-display {
+            font-size: 90px;
+            font-weight: bold;
+            color: #2e0161;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.8);
+        }
+
+        /* --- Estilos para los Botones de Respuesta (Las 4 casillas inferiores) --- */
+        #responses-area {
+            position: absolute;
+            left: 154px;
+            top: 636px;
+            width: 760px;
+            height: 135px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* background: rgba(128,0,128,0.2); border: 2px solid purple; /* Descomentar para debug */
+        }
+
+        .btn-respuesta {
+            width: 180px;
+            height: 120px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 55px;
+            font-weight: bold;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 2px 2px 8px rgba(0,0,0,1);
+            transition: transform 0.1s, opacity 0.2s;
+            opacity: 0.9;
+        }
+
+        .btn-respuesta:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .btn-respuesta:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Estilos para la Zona de 'TU MISIÓN' (Las 3 Estrellas/Retos) --- */
+        #mision-area {
+            position: absolute;
+            left: 1045px;
+            top: 236px;
+            width: 200px;
+            height: 388px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 100px; /* Para esquivar el título 'TU MISIÓN' */
+            /* background: rgba(0,255,255,0.1); border: 2px solid cyan; /* Descomentar para debug */
+        }
+
+        .mision-reto-indicator {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 22px;
+            /* Filtro para que las estrellas sean grises por defecto */
+            filter: grayscale(100%) opacity(0.3);
+            transition: all 0.3s ease;
+        }
+
+        .mision-reto-indicator.completado {
+            /* Brillo de acierto */
+            filter: grayscale(0%) opacity(100%) drop-shadow(0 0 10px #ffea00);
+        }
+
+        /* --- Botones Genéricos y Estado BLE --- */
+        .btn-accion {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            transition: opacity 0.2s;
+        }
+        .btn-accion:hover { opacity: 0.9; }
+
+        .btn-conectar { background: #ffc107; color: #2e0161; margin-bottom: 50px;}
+        .btn-reset { background: #dc3545; color: white; position: absolute; bottom: 10px; right: 10px;}
+
+        #estado {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 14px;
+            font-style: italic;
+            color: #cccccc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Elementos de Audio -->
+    <audio id="audioFondo" src="musica.mp3" loop></audio>
+    <audio id="audioAcierto" src="muybien.mp3"></audio>
+    <audio id="audioError" src="error.mp3"></audio>
+
+    <!-- Contenedor Principal que se ajusta a la interfaz -->
+    <div id="game-container">
+
+        <!-- Marcadores Textuales de la Interfaz -->
+        <div id="puntos-display" class="text-display">PUNTOS<br><span id="puntos-valor">000</span></div>
+        <div id="nivel-display" class="text-display">NIVEL<br>1 / 3</div>
+
+        <!-- Zona Central Interactiva (Conectar y Operación) -->
+        <div id="central-area">
+            <div id="conectar-seccion">
+                <button id="btn-ble" class="btn-accion btn-conectar" onclick="conectarBLE()">CONECTAR ESP32</button>
+            </div>
+            <div id="juego-seccion" style="display: none;">
+                <div id="operacion-display">? x ? =</div>
+            </div>
+        </div>
+
+        <!-- Zona Inferior de Respuestas (Las 4 casillas púrpuras) -->
+        <div id="responses-area">
+            <button class="btn-respuesta" onclick="validarRespuesta(0)"></button>
+            <button class="btn-respuesta" onclick="validarRespuesta(1)"></button>
+            <button class="btn-respuesta" onclick="validarRespuesta(2)"></button>
+            <button class="btn-respuesta" onclick="validarRespuesta(3)"></button>
+        </div>
+
+        <!-- Zona Derecha de TU MISIÓN (Las 3 estrellas indicadoras) -->
+        <div id="mision-area">
+            <!-- Usando la misma imagen de estrellita transparente de tu interfaz, pero controlada por CSS class -->
+            <img src="interfaz.png" class="mision-reto-indicator" id="reto-1-icon"> <!-- O usa estrellitas.png si las tienes separadas -->
+            <img src="interfaz.png" class="mision-reto-indicator" id="reto-2-icon">
+            <img src="interfaz.png" class="mision-reto-indicator" id="reto-3-icon">
+        </div>
+
+        <p id="estado">Estado: Desconectado</p>
+        <button class="btn-accion btn-reset" onclick="reiniciarMision()" style="display:none;" id="btn-reset">RESET</button>
+    </div>
+
+    <script>
+        // UUIDs de BLE
+        const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+        
+        let caracteristicaGlobal = null;
+        
+        // Variables de Lógica de Juego (Acoplada a la imagen)
+        let puntos = 0;
+        const PUNTOS_POR_ACIERTO = 100;
+        const PUNTOS_MAX = 900; // 3 retos x 300 puntos cada uno (9 aciertos)
+        
+        let operacionActual = { a: 0, b: 0, respuesta: 0 };
+        let respuestasPosibles = [];
+        let retoActual = 1; // 1, 2, o 3
+        let misionesCumplidas = 0;
+
+        // Referencias a Audio y DOM
+        const audioFondo = document.getElementById('audioFondo');
+        const audioAcierto = document.getElementById('audioAcierto');
+        const audioError = document.getElementById('audioError');
+        const conectarSeccion = document.getElementById('conectar-seccion');
+        const juegoSeccion = document.getElementById('juego-seccion');
+        const operacionDisplay = document.getElementById('operacion-display');
+        const btnRespuestas = document.querySelectorAll('.btn-respuesta');
+        const misionIcons = [
+            document.getElementById('reto-1-icon'),
+            document.getElementById('reto-2-icon'),
+            document.getElementById('reto-3-icon')
+        ];
+
+        // 1. Conexión Bluetooth BLE (Inicia la música)
+        async function conectarBLE() {
+            iniciarMusicaFondo();
+            document.getElementById('estado').innerText = "Buscando dispositivo...";
+            try {
+                const dispositivo = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'ESP32_Servo_Web' }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                document.getElementById('estado').innerText = "Conectando al servidor...";
+                const servidor = await dispositivo.gatt.connect();
+
+                document.getElementById('estado').innerText = "Obteniendo servicio...";
+                const servicio = await servidor.getPrimaryService(SERVICE_UUID);
+
+                document.getElementById('estado').innerText = "Obteniendo característica...";
+                caracteristicaGlobal = await servicio.getCharacteristic(CHARACTERISTIC_UUID);
+
+                document.getElementById('estado').innerText = "¡Conectado con éxito! Iniciando juego...";
+                
+                // Ocultar botón conectar, mostrar controles de juego y reset
+                conectarSeccion.style.display = 'none';
+                juegoSeccion.style.display = 'block';
+                document.getElementById('btn-reset').style.display = 'block';
+
+                generarNuevaOperacion();
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('estado').innerText = "Error: " + error.message;
+            }
+        }
+
+        // 2. Enviar comandos al ESP32 (Servomotor)
+        async function enviarComando(valor) {
+            if (!caracteristicaGlobal) {
+                console.warn("ESP32 no conectado. Ignorando envío BLE.");
+                return;
+            }
+            try {
+                const encoder = new TextEncoder();
+                await caracteristicaGlobal.writeValue(encoder.encode(valor));
+                console.log("Comando enviado al ESP32: " + valor);
+            } catch (err) {
+                console.error("Error al enviar comando:", err);
+            }
+        }
+
+        // 3. Control de Música de fondo
+        function iniciarMusicaFondo() {
+            if (audioFondo.paused) {
+                audioFondo.volume = 0.4;
+                audioFondo.play().catch(e => console.log("Interacción requerida para audio:", e));
+            }
+        }
+
+        // 4. Lógica del Juego de Multiplicación
+        function generarNuevaOperacion() {
+            // Ajustar dificultad según el reto
+            let maxFactor = (retoActual === 1) ? 5 : (retoActual === 2) ? 8 : 10;
+            
+            // Generar la operación correcta
+            operacionActual.a = Math.floor(Math.random() * (maxFactor - 1)) + 2; // De 2 a maxFactor
+            operacionActual.b = Math.floor(Math.random() * (maxFactor - 1)) + 2; 
+            operacionActual.respuesta = operacionActual.a * operacionActual.b;
+
+            // Mostrar la operación en la zona central
+            operacionDisplay.innerText = `${operacionActual.a} x ${operacionActual.b} =`;
+
+            // Generar las 4 respuestas posibles (1 correcta, 3 incorrectas)
+            respuestasPosibles = [];
+            respuestasPosibles.push(operacionActual.respuesta);
+
+            while (respuestasPosibles.length < 4) {
+                let respuestaFalsa = (operacionActual.a + (Math.random() > 0.5 ? 1 : -1)) * (operacionActual.b + (Math.random() > 0.5 ? 1 : -1));
+                if (respuestaFalsa <= 0) respuestaFalsa = operacionActual.a * 3; // Evitar negativos o ceros simples
+
+                if (respuestaFalsa !== operacionActual.respuesta && !respuestasPosibles.includes(respuestaFalsa)) {
+                    respuestasPosibles.push(respuestaFalsa);
+                }
+            }
+
+            // Mezclar las respuestas
+            respuestasPosibles.sort(() => Math.random() - 0.5);
+
+            // Asignar los textos a los 4 botones púrpuras
+            for (let i = 0; i < 4; i++) {
+                btnRespuestas[i].innerText = respuestasPosibles[i];
+            }
+        }
+
+        function validarRespuesta(indice) {
+            iniciarMusicaFondo();
+            const respuestaElegida = respuestasPosibles[indice];
+
+            if (respuestaElegida === operacionActual.respuesta) {
+                // ACIERTO
+                audioAcierto.currentTime = 0;
+                audioAcierto.play();
+                puntos += PUNTOS_POR_ACIERTO;
+                if (puntos > PUNTOS_MAX) puntos = PUNTOS_MAX;
+                actualizarInterfazVisual();
+
+                // Lógica de avance de retos
+                if (puntos % 300 === 0 && puntos <= PUNTOS_MAX) { // Cada 300 puntos, completas una estrella
+                    retoActual++;
+                    misionesCumplidas++;
+                    actualizarMisionIndicators();
+
+                    // Misión COMPLETADA TOTAL
+                    if (misionesCumplidas === 3) {
+                        setTimeout(() => {
+                            alert("¡MISIÓN COMPLETADA! ABRIENDO LA ESCOTILLA...");
+                            enviarComando('1'); // Comando para abrir servo a 90°
+                        }, 500);
+                        return; // No genera nueva operación si ya terminó
+                    }
+                }
+
+                // Generar la siguiente operación tras un breve retraso
+                setTimeout(generarNuevaOperacion, 600);
+
+            } else {
+                // ERROR
+                audioError.currentTime = 0;
+                audioError.play();
+                // Opcional: penalizar puntos, pero tu interfaz muestra 'Error' como una opción de penalización, quizás sólo reproducir sonido.
+            }
+        }
+
+        // 5. Actualización Visual (Puntaje, Nivel y Estrellitas)
+        function actualizarInterfazVisual() {
+            // Formatear puntos a 000
+            let puntosTexto = (puntos < 100) ? "0" + puntos : puntos;
+            if (puntos < 10) puntosTexto = "00" + puntos;
+            if (puntos === 0) puntosTexto = "000";
+            
+            document.getElementById('puntos-valor').innerText = puntosTexto;
+
+            // Actualizar Nivel (reto) en la interfaz
+            if (retoActual <= 3) {
+                document.getElementById('nivel-display').innerHTML = `NIVEL<br>${retoActual} / 3`;
+            }
+        }
+
+        function actualizarMisionIndicators() {
+            // Encender las estrellas de 'TU MISIÓN'
+            for (let i = 0; i < 3; i++) {
+                if (i < misionesCumplidas) {
+                    misionIcons[i].classList.add('completado');
+                } else {
+                    misionIcons[i].classList.remove('completado');
+                }
+            }
+        }
+
+        function reiniciarMision() {
+            puntos = 0;
+            retoActual = 1;
+            misionesCumplidas = 0;
+            actualizarInterfazVisual();
+            actualizarMisionIndicators();
+            enviarComando('0'); // Volver a cerrar servo a 0°
+            generarNuevaOperacion(); // Empezar de nuevo
+        }
+    </script>
+</body>
+</html>

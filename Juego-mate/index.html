@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Misión Multiplicación</title>
+
+<style>
+
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #070b45;
+}
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+#juego {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+
+    background-image: url("fondo.png");
+    background-size: cover;
+    background-position: center 60%;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
+}
+
+/* =========================================================
+   PUNTOS
+========================================================= */
+
+#panelPuntos {
+    position: absolute;
+
+    left: 2.2%;
+    top: 3.5%;
+
+    width: 15%;
+    height: 10%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    text-align: center;
+
+    font-weight: bold;
+    text-shadow: 2px 2px 3px #000;
+
+    pointer-events: none;
+}
+
+#textoPuntos {
+    font-size: clamp(18px, 2.2vw, 42px);
+    line-height: 1.1;
+}
+
+#textoPuntos small {
+    display: block;
+    font-size: clamp(10px, 1.1vw, 20px);
+    color: #ffffff;
+}
+
+/* =========================================================
+   NIVEL
+========================================================= */
+
+#panelNivel {
+    position: absolute;
+
+    right: 14.5%;
+    top: 3.5%;
+
+    width: 12%;
+    height: 10%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    font-size: clamp(18px, 2.2vw, 40px);
+
+    font-weight: bold;
+
+    text-shadow: 2px 2px 3px #000;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   ZONA DE PREGUNTA
+========================================================= */
+
+#pregunta {
+    position: absolute;
+
+    left: 12%;
+    top: 28%;
+
+    width: 68%;
+    height: 25%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 3%;
+
+    text-align: center;
+
+    color: #10215f;
+
+    font-size: clamp(20px, 2.4vw, 48px);
+
+    font-weight: bold;
+
+    line-height: 1.25;
+
+    overflow-y: auto;
+}
+
+/* =========================================================
+   INDICADOR TIPO DE PREGUNTA
+========================================================= */
+
+#tipoPregunta {
+    position: absolute;
+
+    left: 35%;
+    top: 24%;
+
+    width: 30%;
+    height: 7%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+
+    font-size: clamp(14px, 1.5vw, 28px);
+
+    font-weight: bold;
+
+    text-shadow: 2px 2px 3px #000;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   BOTONES DE RESPUESTA
+========================================================= */
+
+#respuestas {
+    position: absolute;
+
+    left: 15%;
+    bottom: 8%;
+
+    width: 63%;
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 2%;
+}
+
+.botonRespuesta {
+
+    width: 100%;
+
+    min-height: 9vh;
+
+    border: 4px solid #65eaff;
+
+    border-radius: 20px;
+
+    background: linear-gradient(
+        145deg,
+        #8c2cff,
+        #5420bd
+    );
+
+    color: white;
+
+    font-size: clamp(20px, 3vw, 55px);
+
+    font-weight: bold;
+
+    text-shadow: 2px 2px 3px #26005d;
+
+    box-shadow:
+        0 8px 0 #25127a,
+        0 0 15px #00eaff;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s,
+        box-shadow 0.12s,
+        filter 0.12s;
+}
+
+.botonRespuesta:active {
+
+    transform: translateY(7px) scale(0.97);
+
+    box-shadow:
+        0 2px 0 #25127a,
+        0 0 20px #ffffff;
+}
+
+.botonRespuesta:hover {
+    filter: brightness(1.18);
+}
+
+/* =========================================================
+   PANEL TU MISIÓN
+========================================================= */
+
+#panelMision {
+
+    position: absolute;
+
+    right: 2.5%;
+    top: 23%;
+
+    width: 15.5%;
+    height: 43%;
+
+    pointer-events: none;
+}
+
+/*
+   Las estrellas son elementos independientes.
+   Se colocan encima del fondo.
+*/
+
+.estrellaMision {
+
+    position: absolute;
+
+    width: 27%;
+
+    height: auto;
+
+    object-fit: contain;
+
+    opacity: 0.25;
+
+    filter:
+        grayscale(1)
+        brightness(0.7);
+
+    transition:
+        opacity 0.5s,
+        filter 0.5s,
+        transform 0.5s;
+}
+
+/* Posiciones */
+
+#estrella1 {
+    left: 8%;
+    top: 20%;
+}
+
+#estrella2 {
+    left: 8%;
+    top: 39%;
+}
+
+#estrella3 {
+    left: 8%;
+    top: 58%;
+}
+
+/* ESTRELLA CONSEGUIDA */
+
+.estrellaMision.activa {
+
+    opacity: 1;
+
+    filter:
+        drop-shadow(0 0 8px #fff)
+        drop-shadow(0 0 18px #ffd700);
+
+    transform:
+        scale(1.12)
+        rotate(5deg);
+
+    animation: estrellaGanada 0.7s ease;
+}
+
+@keyframes estrellaGanada {
+
+    0% {
+        transform: scale(0.2) rotate(-40deg);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.3) rotate(10deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.12) rotate(5deg);
+    }
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+#errorLuz {
+
+    position: absolute;
+
+    right: 5.2%;
+    top: 76%;
+
+    width: 5%;
+
+    aspect-ratio: 1 / 1;
+
+    border-radius: 50%;
+
+    background: #551111;
+
+    border: 4px solid #ff5757;
+
+    box-shadow:
+        0 0 5px #ff0000;
+
+    opacity: 0.35;
+
+    transition:
+        opacity 0.2s,
+        box-shadow 0.2s;
+}
+
+#errorLuz.activo {
+
+    opacity: 1;
+
+    background: #ff2020;
+
+    box-shadow:
+        0 0 10px #ff0000,
+        0 0 25px #ff0000,
+        0 0 40px #ff5555;
+
+    animation: errorParpadeo 0.8s ease;
+}
+
+@keyframes errorParpadeo {
+
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.3);
+    }
+
+    50% {
+        transform: scale(0.9);
+    }
+
+    75% {
+        transform: scale(1.25);
+    }
+}
+
+/* =========================================================
+   MENSAJE
+========================================================= */
+
+#mensaje {
+
+    position: absolute;
+
+    left: 20%;
+    top: 67%;
+
+    width: 55%;
+
+    text-align: center;
+
+    color: white;
+
+    font-size: clamp(18px, 2vw, 38px);
+
+    font-weight: bold;
+
+    text-shadow:
+        2px 2px 3px #000;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.3s;
+}
+
+#mensaje.visible {
+    opacity: 1;
+}
+
+/* =========================================================
+   BOTÓN BLUETOOTH
+========================================================= */
+
+#btnBluetooth {
+
+    position: absolute;
+
+    right: 1.8%;
+    top: 3%;
+
+    width: 5%;
+    aspect-ratio: 1 / 1;
+
+    border-radius: 50%;
+
+    border: 3px solid white;
+
+    background: linear-gradient(
+        145deg,
+        #1976ff,
+        #083b9e
+    );
+
+    color: white;
+
+    font-size: clamp(16px, 2vw, 35px);
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 15px #00bfff;
+
+    z-index: 20;
+}
+
+#btnBluetooth:active {
+    transform: scale(0.92);
+}
+
+/* =========================================================
+   INDICADOR BLUETOOTH
+========================================================= */
+
+#estadoBluetooth {
+
+    position: absolute;
+
+    right: 1.5%;
+
+    top: 13%;
+
+    width: 7%;
+
+    text-align: center;
+
+    color: white;
+
+    font-size: clamp(9px, 0.9vw, 17px);
+
+    font-weight: bold;
+
+    text-shadow: 1px 1px 2px #000;
+
+    z-index: 20;
+}
+
+#estadoBluetooth.conectado {
+    color: #5cff5c;
+}
+
+#estadoBluetooth.desconectado {
+    color: #ff7070;
+}
+
+/* =========================================================
+   PANTALLA FINAL
+========================================================= */
+
+#pantallaFinal {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    background: rgba(5, 5, 60, 0.86);
+
+    z-index: 100;
+}
+
+#pantallaFinal.visible {
+    display: flex;
+}
+
+#pantallaFinal h1 {
+
+    color: #ffd700;
+
+    font-size: clamp(35px, 6vw, 100px);
+
+    text-align: center;
+
+    text-shadow:
+        0 0 10px #fff,
+        0 0 30px #ffd700;
+}
+
+#pantallaFinal p {
+
+    color: white;
+
+    font-size: clamp(20px, 3vw, 50px);
+
+    margin-top: 20px;
+
+    text-align: center;
+}
+
+#btnReiniciar {
+
+    margin-top: 30px;
+
+    padding: 15px 35px;
+
+    border: none;
+
+    border-radius: 20px;
+
+    background: #ff9d00;
+
+    color: white;
+
+    font-size: clamp(18px, 2vw, 35px);
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 6px 0 #a95100;
+}
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 900px) {
+
+    #respuestas {
+        left: 13%;
+        width: 67%;
+    }
+
+    .botonRespuesta {
+        min-height: 8vh;
+    }
+
+}
+
+@media (orientation: portrait) {
+
+    /*
+       El proyecto está pensado para horizontal.
+       Avisamos si la tablet se gira.
+    */
+
+    #juego::after {
+
+        content: "↔ Gira la tablet a posición horizontal";
+
+        position: absolute;
+
+        inset: 0;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        background: #090c50;
+
+        color: white;
+
+        font-size: 6vw;
+
+        font-weight: bold;
+
+        text-align: center;
+
+        z-index: 999;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="juego">
+
+    <!-- Música de fondo -->
+    <audio id="musicaFondo" loop preload="auto">
+        <source src="musica.mp3" type="audio/mpeg">
+        <source src="fondo.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- =====================================================
+         PUNTOS
+    ====================================================== -->
+
+    <div id="panelPuntos">
+
+        <div id="textoPuntos">
+
+            <small>PUNTOS</small>
+
+            <span id="puntos">0</span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NIVEL
+    ====================================================== -->
+
+    <div id="panelNivel">
+
+        <span id="nivel">1 / 3</span>
+
+    </div>
+
+
+    <!-- =====================================================
+         BOTÓN BLUETOOTH
+    ====================================================== -->
+
+    <button
+        id="btnBluetooth"
+        onclick="conectarBluetooth()"
+        aria-label="Conectar Bluetooth">
+
+        📡
+
+    </button>
+
+
+    <div
+        id="estadoBluetooth"
+        class="desconectado">
+
+        Bluetooth opcional
+
+    </div>
+
+
+    <!-- =====================================================
+         TIPO DE PREGUNTA
+    ====================================================== -->
+
+    <div id="tipoPregunta">
+
+        🚀 ¡RESUELVE EL RETO!
+
+    </div>
+
+
+    <!-- =====================================================
+         PREGUNTA
+    ====================================================== -->
+
+    <div id="pregunta">
+
+        Preparando misión...
+
+    </div>
+
+
+    <!-- =====================================================
+         PANEL TU MISIÓN
+    ====================================================== -->
+
+    <div id="panelMision">
+
+        <!-- Las estrellas se cargan como imágenes independientes -->
+
+        <img
+            id="estrella1"
+            class="estrellaMision"
+            src="estrellitas.png"
+            alt="Reto 1">
+
+        <img
+            id="estrella2"
+            class="estrellaMision"
+            src="estrellitas.png"
+            alt="Reto 2">
+
+        <img
+            id="estrella3"
+            class="estrellaMision"
+            src="estrellitas.png"
+            alt="Reto 3">
+
+    </div>
+
+
+    <!-- =====================================================
+         INDICADOR DE ERROR
+    ====================================================== -->
+
+    <div id="errorLuz"></div>
+
+
+    <!-- =====================================================
+         MENSAJE
+    ====================================================== -->
+
+    <div id="mensaje"></div>
+
+
+    <!-- =====================================================
+         RESPUESTAS
+    ====================================================== -->
+
+    <div id="respuestas">
+
+        <button
+            class="botonRespuesta"
+            onclick="responder(0)">
+        </button>
+
+        <button
+            class="botonRespuesta"
+            onclick="responder(1)">
+        </button>
+
+        <button
+            class="botonRespuesta"
+            onclick="responder(2)">
+        </button>
+
+        <button
+            class="botonRespuesta"
+            onclick="responder(3)">
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PANTALLA FINAL
+    ====================================================== -->
+
+    <div id="pantallaFinal">
+
+        <h1>🎉 ¡MISIÓN COMPLETADA! 🎉</h1>
+
+        <p>
+            ¡Has conseguido las 3 estrellas!
+        </p>
+
+        <p>
+            🏆 Puntaje:
+            <strong id="puntajeFinal">0</strong>
+        </p>
+
+        <button
+            id="btnReiniciar"
+            onclick="reiniciarJuego()">
+
+            🔄 JUGAR DE NUEVO
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN BLUETOOTH ESP32
+========================================================= */
+
+/*
+   IMPORTANTE:
+
+   Estos UUID deben ser EXACTAMENTE iguales
+   a los utilizados en el código del ESP32.
+
+   Más adelante te daré el código del ESP32
+   utilizando estos mismos UUID.
+*/
+
+const SERVICE_UUID =
+    "12345678-1234-1234-1234-123456789abc";
+
+const CHARACTERISTIC_UUID =
+    "abcdefab-1234-1234-1234-123456789abc";
+
+
+let dispositivoBLE = null;
+
+let caracteristicaBLE = null;
+
+
+/* =========================================================
+   BANCO DE PREGUNTAS
+========================================================= */
+
+/*
+   NIVEL 1:
+   Multiplicación de 2 cifras × 1 cifra
+
+   NIVEL 2:
+   Multiplicación de 2 cifras × 2 cifras
+
+   NIVEL 3:
+   Multiplicación de 3 cifras × 2 cifras
+*/
+
+
+const bancoPreguntas = [
+
+/* =====================================================
+   NIVEL 1
+===================================================== */
+
+{
+    nivel: 1,
+    pregunta:
+    "En una fiesta hay 24 niños. Cada niño recibe 3 dulces. ¿Cuántos dulces se necesitan en total?",
+
+    respuesta: 72
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Una biblioteca tiene 18 estantes. En cada estante hay 4 libros de matemáticas. ¿Cuántos libros hay?",
+
+    respuesta: 72
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Hay 32 estudiantes y cada uno recibe 2 lápices. ¿Cuántos lápices se necesitan?",
+
+    respuesta: 64
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Una granja tiene 21 corrales y en cada corral hay 3 gallinas. ¿Cuántas gallinas hay?",
+
+    respuesta: 63
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "En una caja hay 15 bolsas y cada bolsa tiene 4 dulces. ¿Cuántos dulces hay?",
+
+    respuesta: 60
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Una escuela tiene 26 mesas y cada mesa tiene 3 libros. ¿Cuántos libros hay?",
+
+    respuesta: 78
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Hay 14 grupos y cada grupo tiene 5 estudiantes. ¿Cuántos estudiantes hay?",
+
+    respuesta: 70
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Una tienda tiene 23 cajas con 4 juguetes en cada caja. ¿Cuántos juguetes hay?",
+
+    respuesta: 92
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Un entrenador tiene 16 equipos y entrega 3 balones a cada uno. ¿Cuántos balones necesita?",
+
+    respuesta: 48
+},
+
+{
+    nivel: 1,
+    pregunta:
+    "Hay 27 bolsas y cada una contiene 2 caramelos. ¿Cuántos caramelos hay?",
+
+    respuesta: 54
+},
+
+
+/* =====================================================
+   NIVEL 2
+===================================================== */
+
+{
+    nivel: 2,
+    pregunta:
+    "Una escuela compra 24 cajas de lápices. Cada caja tiene 12 lápices. ¿Cuántos lápices compró?",
+
+    respuesta: 288
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Hay 15 cajas con 16 manzanas cada una. ¿Cuántas manzanas hay?",
+
+    respuesta: 240
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Una biblioteca tiene 21 estantes y cada uno contiene 14 libros. ¿Cuántos libros hay?",
+
+    respuesta: 294
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Una fábrica prepara 18 cajas con 15 juguetes cada una. ¿Cuántos juguetes prepara?",
+
+    respuesta: 270
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "En una feria hay 25 mesas con 12 vasos en cada mesa. ¿Cuántos vasos hay?",
+
+    respuesta: 300
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Un colegio tiene 16 salones y cada salón tiene 18 estudiantes. ¿Cuántos estudiantes hay?",
+
+    respuesta: 288
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Una tienda recibe 13 cajas con 24 cuadernos cada una. ¿Cuántos cuadernos recibe?",
+
+    respuesta: 312
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Hay 22 paquetes con 11 tarjetas en cada uno. ¿Cuántas tarjetas hay?",
+
+    respuesta: 242
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Un agricultor tiene 14 filas con 20 plantas en cada fila. ¿Cuántas plantas tiene?",
+
+    respuesta: 280
+},
+
+{
+    nivel: 2,
+    pregunta:
+    "Una fábrica produce 17 bolsas con 15 juguetes cada una. ¿Cuántos juguetes produce?",
+
+    respuesta: 255
+},
+
+
+/* =====================================================
+   NIVEL 3
+===================================================== */
+
+{
+    nivel: 3,
+    pregunta:
+    "Para una actividad se preparan 125 paquetes. Cada paquete tiene 24 tarjetas. ¿Cuántas tarjetas se prepararon?",
+
+    respuesta: 3000
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una fábrica prepara 120 bolsas y coloca 25 juguetes en cada una. ¿Cuántos juguetes necesita?",
+
+    respuesta: 3000
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una escuela compra 135 cajas con 20 lápices cada una. ¿Cuántos lápices compra?",
+
+    respuesta: 2700
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una biblioteca recibe 150 paquetes con 12 libros cada uno. ¿Cuántos libros recibe?",
+
+    respuesta: 1800
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una fábrica produce 125 cajas con 16 juguetes cada una. ¿Cuántos juguetes produce?",
+
+    respuesta: 2000
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "En un estadio hay 140 filas con 15 asientos cada una. ¿Cuántos asientos hay?",
+
+    respuesta: 2100
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una empresa prepara 115 paquetes con 20 tarjetas cada uno. ¿Cuántas tarjetas prepara?",
+
+    respuesta: 2300
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una granja tiene 125 corrales con 18 animales en cada uno. ¿Cuántos animales hay?",
+
+    respuesta: 2250
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una escuela recibe 130 cajas con 15 cuadernos cada una. ¿Cuántos cuadernos recibe?",
+
+    respuesta: 1950
+},
+
+{
+    nivel: 3,
+    pregunta:
+    "Una fábrica produce 125 paquetes con 24 piezas cada uno. ¿Cuántas piezas produce?",
+
+    respuesta: 3000
+}
+
+];
+
+
+/* =========================================================
+   VARIABLES DEL JUEGO
+========================================================= */
+
+let nivelActual = 1;
+
+let puntos = 0;
+
+let preguntaActual = null;
+
+let preguntasUsadas = [];
+
+let juegoTerminado = false;
+
+
+/* =========================================================
+   ELEMENTOS HTML
+========================================================= */
+
+const preguntaElemento =
+    document.getElementById("pregunta");
+
+const botones =
+    document.querySelectorAll(".botonRespuesta");
+
+const puntosElemento =
+    document.getElementById("puntos");
+
+const nivelElemento =
+    document.getElementById("nivel");
+
+const mensajeElemento =
+    document.getElementById("mensaje");
+
+const errorLuz =
+    document.getElementById("errorLuz");
+
+const estrella1 =
+    document.getElementById("estrella1");
+
+const estrella2 =
+    document.getElementById("estrella2");
+
+const estrella3 =
+    document.getElementById("estrella3");
+
+const pantallaFinal =
+    document.getElementById("pantallaFinal");
+
+const puntajeFinal =
+    document.getElementById("puntajeFinal");
+
+const estadoBluetooth =
+    document.getElementById("estadoBluetooth");
+
+
+/* =========================================================
+   INICIAR JUEGO
+========================================================= */
+
+function iniciarJuego() {
+
+    nivelActual = 1;
+
+    puntos = 0;
+
+    juegoTerminado = false;
+
+    preguntasUsadas = [];
+
+    puntosElemento.textContent = "0";
+
+    nivelElemento.textContent = "1 / 3";
+
+    pantallaFinal.classList.remove("visible");
+
+    estrella1.classList.remove("activa");
+    estrella2.classList.remove("activa");
+    estrella3.classList.remove("activa");
+
+    errorLuz.classList.remove("activo");
+
+    siguientePregunta();
+
+}
+
+
+/* =========================================================
+   BUSCAR PREGUNTA ALEATORIA
+========================================================= */
+
+function obtenerPreguntaAleatoria(nivel) {
+
+    const disponibles =
+        bancoPreguntas.filter(
+            pregunta =>
+                pregunta.nivel === nivel &&
+                !preguntasUsadas.includes(pregunta)
+        );
+
+    if (disponibles.length === 0) {
+
+        preguntasUsadas =
+            preguntasUsadas.filter(
+                pregunta =>
+                    pregunta.nivel !== nivel
+            );
+
+        return obtenerPreguntaAleatoria(nivel);
+    }
+
+    const indice =
+        Math.floor(
+            Math.random() * disponibles.length
+        );
+
+    const seleccion =
+        disponibles[indice];
+
+    preguntasUsadas.push(seleccion);
+
+    return seleccion;
+}
+
+
+/* =========================================================
+   SIGUIENTE PREGUNTA
+========================================================= */
+
+function siguientePregunta() {
+
+    if (nivelActual > 3) {
+
+        finalizarJuego();
+
+        return;
+    }
+
+    preguntaActual =
+        obtenerPreguntaAleatoria(nivelActual);
+
+    nivelElemento.textContent =
+        nivelActual + " / 3";
+
+    preguntaElemento.textContent =
+        preguntaActual.pregunta;
+
+    mensajeElemento.classList.remove("visible");
+
+    crearRespuestas();
+
+}
+
+
+/* =========================================================
+   CREAR RESPUESTAS
+========================================================= */
+
+function crearRespuestas() {
+
+    const correcta =
+        preguntaActual.respuesta;
+
+    const respuestas =
+        generarRespuestas(correcta);
+
+    /* Mezclar */
+
+    respuestas.sort(
+        () => Math.random() - 0.5
+    );
+
+    botones.forEach(
+        (boton, indice) => {
+
+            boton.textContent =
+                respuestas[indice];
+
+            boton.disabled = false;
+
+        }
+    );
+}
+
+
+/* =========================================================
+   GENERAR RESPUESTAS INCORRECTAS
+========================================================= */
+
+function generarRespuestas(correcta) {
+
+    const respuestas =
+        new Set();
+
+    respuestas.add(correcta);
+
+    while (respuestas.size < 4) {
+
+        let diferencia;
+
+        if (nivelActual === 1) {
+
+            diferencia =
+                Math.floor(
+                    Math.random() * 20
+                ) + 5;
+
+        } else if (nivelActual === 2) {
+
+            diferencia =
+                Math.floor(
+                    Math.random() * 50
+                ) + 10;
+
+        } else {
+
+            diferencia =
+                Math.floor(
+                    Math.random() * 300
+                ) + 50;
+        }
+
+        const signo =
+            Math.random() < 0.5
+                ? -1
+                : 1;
+
+        let incorrecta =
+            correcta +
+            diferencia * signo;
+
+        if (incorrecta > 0) {
+
+            respuestas.add(incorrecta);
+        }
+    }
+
+    return Array.from(respuestas);
+}
+
+
+/* =========================================================
+   RESPONDER
+========================================================= */
+
+function responder(indice) {
+
+    if (juegoTerminado) {
+        return;
+    }
+
+    const valor =
+        Number(
+            botones[indice].textContent
+        );
+
+    if (
+        valor ===
+        preguntaActual.respuesta
+    ) {
+
+        respuestaCorrecta();
+
+    } else {
+
+        respuestaIncorrecta();
+    }
+}
+
+
+/* =========================================================
+   RESPUESTA CORRECTA
+========================================================= */
+
+function respuestaCorrecta() {
+
+    botones.forEach(
+        boton =>
+            boton.disabled = true
+    );
+
+    puntos += 100;
+
+    puntosElemento.textContent =
+        puntos;
+
+    mostrarMensaje(
+        "⭐ ¡CORRECTO! +100 PUNTOS"
+    );
+
+    activarEstrella(nivelActual);
+
+    /*
+       Enviar señal al ESP32
+    */
+
+    enviarBluetooth(
+        "Q" + nivelActual + "_OK"
+    );
+
+
+    setTimeout(() => {
+
+        nivelActual++;
+
+        if (nivelActual <= 3) {
+
+            siguientePregunta();
+
+        } else {
+
+            finalizarJuego();
+
+        }
+
+    }, 1500);
+}
+
+
+/* =========================================================
+   ACTIVAR ESTRELLA
+========================================================= */
+
+function activarEstrella(nivel) {
+
+    if (nivel === 1) {
+
+        estrella1.classList.add("activa");
+
+    }
+
+    if (nivel === 2) {
+
+        estrella2.classList.add("activa");
+
+    }
+
+    if (nivel === 3) {
+
+        estrella3.classList.add("activa");
+
+    }
+}
+
+
+/* =========================================================
+   RESPUESTA INCORRECTA
+========================================================= */
+
+function respuestaIncorrecta() {
+
+    /*
+       Si la respuesta es incorrecta,
+       se reinicia completamente el nivel actual.
+       Los puntos de niveles anteriores se conservan.
+    */
+
+    mostrarMensaje(
+        "❌ ¡Respuesta incorrecta! Reiniciando nivel..."
+    );
+
+    errorLuz.classList.remove("activo");
+
+    /* Forzar reinicio de la animación */
+    void errorLuz.offsetWidth;
+
+    errorLuz.classList.add("activo");
+
+    /* Enviar ERROR al ESP32 si está conectado */
+    enviarBluetooth("ERROR");
+
+    /*
+       Después de mostrar el aviso,
+       vuelve a comenzar el nivel actual.
+    */
+    setTimeout(() => {
+
+        errorLuz.classList.remove("activo");
+
+        /* Apagar la estrella del nivel que se reinicia */
+        if (nivelActual === 1) {
+            estrella1.classList.remove("activa");
+        }
+
+        if (nivelActual === 2) {
+            estrella2.classList.remove("activa");
+        }
+
+        if (nivelActual === 3) {
+            estrella3.classList.remove("activa");
+        }
+
+        mensajeElemento.classList.remove("visible");
+
+        /* Cargar una nueva pregunta del mismo nivel */
+        siguientePregunta();
+
+    }, 1200);
+}
+
+
+/* =========================================================
+   MOSTRAR MENSAJE
+========================================================= */
+
+function mostrarMensaje(texto) {
+
+    mensajeElemento.textContent =
+        texto;
+
+    mensajeElemento.classList.add(
+        "visible"
+    );
+}
+
+
+/* =========================================================
+   FINALIZAR JUEGO
+========================================================= */
+
+function finalizarJuego() {
+
+    juegoTerminado = true;
+
+    puntajeFinal.textContent =
+        puntos;
+
+    pantallaFinal.classList.add(
+        "visible"
+    );
+
+    enviarBluetooth(
+        "Q3_OK"
+    );
+}
+
+
+/* =========================================================
+   REINICIAR
+========================================================= */
+
+function reiniciarJuego() {
+
+    enviarBluetooth(
+        "RESET"
+    );
+
+    iniciarJuego();
+}
+
+
+/* =========================================================
+   BLUETOOTH BLE
+========================================================= */
+
+async function conectarBluetooth() {
+
+    /*
+       Verificar soporte
+    */
+
+    // Bluetooth es OPCIONAL: el juego funciona completamente sin conectarlo.
+    if (!navigator.bluetooth) {
+        estadoBluetooth.textContent = "Bluetooth no disponible";
+        estadoBluetooth.className = "desconectado";
+        return;
+    }
+
+
+    try {
+
+        estadoBluetooth.textContent =
+            "Buscando ESP32...";
+
+        estadoBluetooth.className = "";
+
+
+        /*
+           Solicitar dispositivo
+        */
+
+        dispositivoBLE =
+            await navigator.bluetooth.requestDevice({
+
+                filters: [
+                    {
+                        namePrefix: "ESP32"
+                    }
+                ],
+
+                optionalServices: [
+                    SERVICE_UUID
+                ]
+
+            });
+
+
+        estadoBluetooth.textContent =
+            "Conectando...";
+
+
+        /*
+           Conectarse al ESP32
+        */
+
+        const servidor =
+            await dispositivoBLE.gatt.connect();
+
+
+        /*
+           Obtener servicio
+        */
+
+        const servicio =
+            await servidor.getPrimaryService(
+                SERVICE_UUID
+            );
+
+
+        /*
+           Obtener característica
+        */
+
+        caracteristicaBLE =
+            await servicio.getCharacteristic(
+                CHARACTERISTIC_UUID
+            );
+
+
+        /*
+           Estado conectado
+        */
+
+        estadoBluetooth.textContent =
+            "Bluetooth conectado";
+
+        estadoBluetooth.className =
+            "conectado";
+
+
+        /*
+           Si se pierde la conexión
+        */
+
+        dispositivoBLE.addEventListener(
+            "gattserverdisconnected",
+            bluetoothDesconectado
+        );
+
+
+        /*
+           Enviar RESET al conectar
+        */
+
+        enviarBluetooth("RESET");
+
+
+    } catch (error) {
+
+        console.error(
+            "Error Bluetooth:",
+            error
+        );
+
+        estadoBluetooth.textContent =
+            "Desconectado";
+
+        estadoBluetooth.className =
+            "desconectado";
+    }
+}
+
+
+/* =========================================================
+   BLUETOOTH DESCONECTADO
+========================================================= */
+
+function bluetoothDesconectado() {
+
+    estadoBluetooth.textContent =
+        "Bluetooth desconectado";
+
+    estadoBluetooth.className =
+        "desconectado";
+
+    dispositivoBLE = null;
+
+    caracteristicaBLE = null;
+}
+
+
+/* =========================================================
+   ENVIAR DATOS AL ESP32
+========================================================= */
+
+async function enviarBluetooth(mensaje) {
+
+    /*
+       Si todavía no está conectado,
+       simplemente no enviamos.
+    */
+
+    // Si no hay Bluetooth conectado, simplemente continuamos el juego.
+    if (!caracteristicaBLE) {
+        console.log("Bluetooth no conectado. Juego continúa normalmente:", mensaje);
+        return;
+    }
+
+
+    try {
+
+        const datos =
+            new TextEncoder().encode(
+                mensaje
+            );
+
+
+        await caracteristicaBLE
+            .writeValue(datos);
+
+
+        console.log(
+            "Enviado al ESP32:",
+            mensaje
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error enviando Bluetooth:",
+            error
+        );
+    }
+}
+
+
+/* =========================================================
+   MÚSICA DE FONDO
+========================================================= */
+
+const musicaFondo = document.getElementById("musicaFondo");
+musicaFondo.volume = 0.35;
+
+function iniciarMusica() {
+    const promesa = musicaFondo.play();
+    if (promesa !== undefined) {
+        promesa.catch(() => {
+            // El navegador puede bloquear el autoplay.
+            // La música comenzará en cuanto el usuario toque/clickee la pantalla.
+        });
+    }
+}
+
+// Intentar iniciar al cargar y nuevamente con la primera interacción.
+window.addEventListener("load", iniciarMusica);
+["click", "touchstart", "keydown"].forEach(evento => {
+    document.addEventListener(evento, iniciarMusica, { once: true });
+});
+
+// Si musica.mp3 no existe, probar automáticamente con fondo.mp3.
+musicaFondo.addEventListener("error", () => {
+    if (!musicaFondo.dataset.fallback) {
+        musicaFondo.dataset.fallback = "1";
+        musicaFondo.src = "fondo.mp3";
+        musicaFondo.load();
+        iniciarMusica();
+    }
+});
+
+/* =========================================================
+   INICIO AUTOMÁTICO
+========================================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        iniciarJuego();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

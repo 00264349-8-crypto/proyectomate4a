@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión Multiplicación - Control de Escotilla</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial Black', sans-serif;
+            background-color: #080b1a;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: white;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        /* CONTENEDOR MANTENIENDO RELACIÓN 16:9 DE TU IMAGEN */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 ratio */
+            
+            background-image: url('interfaz.png');
+            background-size: 100% 100%; /* Forzar encaje exacto */
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            container-type: inline-size; 
+        }
+
+        /* --- MARCADORES TEXTUALES CORREGIDOS --- */
+        .text-display {
+            position: absolute;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* PUNTOS (Encajado exacto en la casilla azul superior izquierda) */
+        #puntos-display {
+            left: 8.5%;
+            top: 8.8%;
+            width: 6.8%;
+            height: 5%;
+            font-size: 2cqw;
+            color: #ffffff;
+        }
+
+        /* NIVEL (Encajado exacto en la casilla azul superior derecha) */
+        #nivel-display {
+            left: 77.2%;
+            top: 8.8%;
+            width: 6.8%;
+            height: 5%;
+            font-size: 2cqw;
+            color: #ffffff;
+        }
+
+        /* --- ZONA CENTRAL (Pantalla Blanca) --- */
+        #central-area {
+            position: absolute;
+            left: 17%;
+            top: 33%;
+            width: 63.5%;
+            height: 27%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #conectar-seccion {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #operacion-display {
+            font-size: 7cqw;
+            font-weight: 900;
+            color: #1a0033;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+            letter-spacing: 2px;
+        }
+
+        /* --- CASILLAS DE RESPUESTA (GRID DE 4 COLUMNAS PERFECTAS) --- */
+        #responses-area {
+            position: absolute;
+            left: 15.5%;
+            top: 66.2%;
+            width: 62.8%;
+            height: 14.5%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            column-gap: 2.2%;
+            align-items: center;
+        }
+
+        .btn-respuesta {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 4.8cqw;
+            font-weight: 900;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
+            transition: transform 0.1s ease;
+        }
+
+        .btn-respuesta:hover {
+            transform: scale(1.08);
+        }
+
+        .btn-respuesta:active {
+            transform: scale(0.92);
+        }
+
+        /* --- ZONA DERECHA "TU MISIÓN" --- */
+        #mision-area {
+            position: absolute;
+            left: 83.8%;
+            top: 33.5%;
+            width: 12%;
+            height: 38%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 13%;
+        }
+
+        .mision-reto-indicator {
+            width: 2.2cqw;
+            height: 2.2cqw;
+            filter: grayscale(100%) opacity(0.2);
+            transition: all 0.3s ease;
+        }
+
+        .mision-reto-indicator.completado {
+            filter: grayscale(0%) opacity(100%) drop-shadow(0 0 10px #ffea00);
+        }
+
+        /* --- BOTONES GENERALES --- */
+        .btn-accion {
+            padding: 0.8cqw 2cqw;
+            font-size: 1.5cqw;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-conectar { 
+            background: linear-gradient(180deg, #ffdb4d, #ffc107);
+            color: #2e0161; 
+        }
+
+        .btn-omitir {
+            background: linear-gradient(180deg, #28a745, #1e7e34);
+            color: #ffffff;
+        }
+        
+        .btn-accion:hover { transform: translateY(-2px); }
+        .btn-accion:active { transform: translateY(1px); }
+
+        .btn-reset { 
+            background: linear-gradient(180deg, #ff6b6b, #dc3545);
+            color: white; 
+            position: absolute; 
+            bottom: 3%; 
+            right: 2%;
+            font-size: 1.1cqw;
+            padding: 0.4cqw 1.2cqw;
+        }
+
+        #estado {
+            position: absolute;
+            bottom: 2.5%;
+            left: 2%;
+            font-size: 1.1cqw;
+            color: #ffffff;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Elementos de Audio -->
+    <audio id="audioFondo" src="musica.mp3" loop></audio>
+    <audio id="audioAcierto" src="muybien.mp3"></audio>
+    <audio id="audioError" src="error.mp3"></audio>
+
+    <div class="game-wrapper">
+        <div id="game-container">
+
+            <!-- Marcadores Textuales Alineados Exactamente -->
+            <div id="puntos-display" class="text-display"><span id="puntos-valor">000</span></div>
+            <div id="nivel-display" class="text-display"><span id="nivel-valor">1 / 3</span></div>
+
+            <!-- Zona Central (Operación / Pantalla Inicial) -->
+            <div id="central-area">
+                <div id="conectar-seccion">
+                    <button id="btn-ble" class="btn-accion btn-conectar" onclick="conectarBLE()">1. Conectar ESP32</button>
+                    <button class="btn-accion btn-omitir" onclick="iniciarJuegoSinBLE()">2. Jugar sin Conectar</button>
+                </div>
+                <div id="juego-seccion" style="display: none;">
+                    <div id="operacion-display">? x ? =</div>
+                </div>
+            </div>
+
+            <!-- 4 Respuestas alineadas con Grid en las 4 casillas púrpuras -->
+            <div id="responses-area">
+                <button class="btn-respuesta" onclick="validarRespuesta(0)"></button>
+                <button class="btn-respuesta" onclick="validarRespuesta(1)"></button>
+                <button class="btn-respuesta" onclick="validarRespuesta(2)"></button>
+                <button class="btn-respuesta" onclick="validarRespuesta(3)"></button>
+            </div>
+
+            <!-- Indicadores Misión (Alineados con RETO 1, RETO 2, RETO 3) -->
+            <div id="mision-area">
+                <img src="estrellitas.png" class="mision-reto-indicator" id="reto-1-icon" alt="Reto 1">
+                <img src="estrellitas.png" class="mision-reto-indicator" id="reto-2-icon" alt="Reto 2">
+                <img src="estrellitas.png" class="mision-reto-indicator" id="reto-3-icon" alt="Reto 3">
+            </div>
+
+            <p id="estado">Estado: Esperando opción...</p>
+            <button class="btn-accion btn-reset" onclick="reiniciarMision()" style="display:none;" id="btn-reset">RESET</button>
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+        
+        let caracteristicaGlobal = null;
+        
+        let puntos = 0;
+        const PUNTOS_POR_ACIERTO = 100;
+        const PUNTOS_MAX = 900;
+        
+        let operacionActual = { a: 0, b: 0, respuesta: 0 };
+        let respuestasPosibles = [];
+        let retoActual = 1;
+        let misionesCumplidas = 0;
+
+        const audioFondo = document.getElementById('audioFondo');
+        const audioAcierto = document.getElementById('audioAcierto');
+        const audioError = document.getElementById('audioError');
+        const conectarSeccion = document.getElementById('conectar-seccion');
+        const juegoSeccion = document.getElementById('juego-seccion');
+        const operacionDisplay = document.getElementById('operacion-display');
+        const btnRespuestas = document.querySelectorAll('.btn-respuesta');
+        const misionIcons = [
+            document.getElementById('reto-1-icon'),
+            document.getElementById('reto-2-icon'),
+            document.getElementById('reto-3-icon')
+        ];
+
+        async function conectarBLE() {
+            iniciarMusicaFondo();
+            document.getElementById('estado').innerText = "Buscando...";
+            try {
+                const dispositivo = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'ESP32_Servo_Web' }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                document.getElementById('estado').innerText = "Conectando...";
+                const servidor = await dispositivo.gatt.connect();
+                const servicio = await servidor.getPrimaryService(SERVICE_UUID);
+                caracteristicaGlobal = await servicio.getCharacteristic(CHARACTERISTIC_UUID);
+
+                document.getElementById('estado').innerText = "¡Conectado a ESP32!";
+                iniciarModoJuego();
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('estado').innerText = "Error BLE. Modo sin conexión.";
+            }
+        }
+
+        function iniciarJuegoSinBLE() {
+            iniciarMusicaFondo();
+            document.getElementById('estado').innerText = "Modo autónomo (Sin ESP32)";
+            iniciarModoJuego();
+        }
+
+        function iniciarModoJuego() {
+            conectarSeccion.style.display = 'none';
+            juegoSeccion.style.display = 'block';
+            document.getElementById('btn-reset').style.display = 'block';
+            generarNuevaOperacion();
+        }
+
+        async function enviarComando(valor) {
+            if (!caracteristicaGlobal) return;
+            try {
+                const encoder = new TextEncoder();
+                await caracteristicaGlobal.writeValue(encoder.encode(valor));
+            } catch (err) {
+                console.error("Error BLE:", err);
+            }
+        }
+
+        function iniciarMusicaFondo() {
+            if (audioFondo.paused) {
+                audioFondo.volume = 0.4;
+                audioFondo.play().catch(e => console.log(e));
+            }
+        }
+
+        function generarNuevaOperacion() {
+            let maxFactor = (retoActual === 1) ? 5 : (retoActual === 2) ? 8 : 10;
+            
+            operacionActual.a = Math.floor(Math.random() * (maxFactor - 1)) + 2;
+            operacionActual.b = Math.floor(Math.random() * (maxFactor - 1)) + 2; 
+            operacionActual.respuesta = operacionActual.a * operacionActual.b;
+
+            operacionDisplay.innerText = `${operacionActual.a} x ${operacionActual.b} =`;
+
+            respuestasPosibles = [operacionActual.respuesta];
+
+            while (respuestasPosibles.length < 4) {
+                let respuestaFalsa = (operacionActual.a + (Math.random() > 0.5 ? 1 : -1)) * (operacionActual.b + (Math.random() > 0.5 ? 1 : -1));
+                if (respuestaFalsa <= 0) respuestaFalsa = operacionActual.a * 3;
+
+                if (respuestaFalsa !== operacionActual.respuesta && !respuestasPosibles.includes(respuestaFalsa)) {
+                    respuestasPosibles.push(respuestaFalsa);
+                }
+            }
+
+            respuestasPosibles.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < 4; i++) {
+                btnRespuestas[i].innerText = respuestasPosibles[i];
+            }
+        }
+
+        function validarRespuesta(indice) {
+            iniciarMusicaFondo();
+            const respuestaElegida = respuestasPosibles[indice];
+
+            if (respuestaElegida === operacionActual.respuesta) {
+                audioAcierto.currentTime = 0;
+                audioAcierto.play();
+                puntos += PUNTOS_POR_ACIERTO;
+                if (puntos > PUNTOS_MAX) puntos = PUNTOS_MAX;
+                actualizarInterfazVisual();
+
+                if (puntos % 300 === 0 && puntos <= PUNTOS_MAX) {
+                    retoActual++;
+                    misionesCumplidas++;
+                    actualizarMisionIndicators();
+
+                    if (misionesCumplidas === 3) {
+                        setTimeout(() => {
+                            alert("¡MISIÓN COMPLETADA! ABRIENDO ESCOTILLA...");
+                            enviarComando('1');
+                        }, 400);
+                        return;
+                    }
+                }
+
+                setTimeout(generarNuevaOperacion, 500);
+
+            } else {
+                audioError.currentTime = 0;
+                audioError.play();
+            }
+        }
+
+        function actualizarInterfazVisual() {
+            let puntosTexto = (puntos < 100) ? "0" + puntos : puntos;
+            if (puntos < 10) puntosTexto = "00" + puntos;
+            if (puntos === 0) puntosTexto = "000";
+            
+            document.getElementById('puntos-valor').innerText = puntosTexto;
+
+            if (retoActual <= 3) {
+                document.getElementById('nivel-valor').innerText = `${retoActual} / 3`;
+            }
+        }
+
+        function actualizarMisionIndicators() {
+            for (let i = 0; i < 3; i++) {
+                if (i < misionesCumplidas) {
+                    misionIcons[i].classList.add('completado');
+                } else {
+                    misionIcons[i].classList.remove('completado');
+                }
+            }
+        }
+
+        function reiniciarMision() {
+            puntos = 0;
+            retoActual = 1;
+            misionesCumplidas = 0;
+            actualizarInterfazVisual();
+            actualizarMisionIndicators();
+            enviarComando('0');
+            generarNuevaOperacion();
+        }
+    </script>
+</body>
+</html>
