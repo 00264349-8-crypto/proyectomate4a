@@ -634,6 +634,330 @@ body {
     }
 }
 
+
+/* =========================================================
+   AJUSTE DEL FONDO NUEVO 2048 × 1151
+   Los elementos interactivos se alinean con las zonas
+   dibujadas directamente en fondo.png.
+========================================================= */
+
+#juego {
+    background-size: 100% 100%;
+    background-position: center center;
+}
+
+/* El texto "PUNTOS" ya está dibujado en fondo.png.
+   Solo mostramos el valor dinámico. */
+#panelPuntos {
+    left: 2.2%;
+    top: 3.5%;
+    width: 15%;
+    height: 10%;
+}
+
+#textoPuntos small {
+    display: none;
+}
+
+#textoPuntos {
+    width: 100%;
+    text-align: center;
+}
+
+#panelNivel {
+    right: 14.5%;
+    top: 3.5%;
+    width: 12%;
+    height: 10%;
+}
+
+/* Zona blanca de la pregunta */
+#pregunta {
+    left: 9%;
+    top: 27%;
+    width: 57%;
+    height: 23%;
+    padding: 2.5%;
+}
+
+/* Indicador dinámico sobre el área superior de la pregunta */
+#tipoPregunta {
+    left: 20%;
+    top: 24%;
+    width: 50%;
+    height: 6%;
+}
+
+/* Los botones se colocan exactamente sobre los
+   cuatro botones dibujados en fondo.png. */
+#respuestas {
+    left: 12.6%;
+    top: 53.7%;
+    bottom: auto;
+    width: 49.4%;
+    gap: 1.2%;
+}
+
+.botonRespuesta {
+    min-height: 0;
+    height: 11.8vh;
+}
+
+/* Panel de misión: conserva las posiciones de las estrellas */
+#panelMision {
+    right: 2.5%;
+    top: 23%;
+    width: 15.5%;
+    height: 43%;
+}
+
+/* Las estrellas quedan centradas dentro de cada reto */
+.estrellaMision {
+    width: 27%;
+}
+
+#estrella1 {
+    left: 8%;
+    top: 20%;
+}
+
+#estrella2 {
+    left: 8%;
+    top: 39%;
+}
+
+#estrella3 {
+    left: 8%;
+    top: 58%;
+}
+
+/* La luz de error coincide con la luz roja del fondo */
+#errorLuz {
+    right: 5.2%;
+    top: 47.7%;
+    width: 5%;
+}
+
+/* Mensajes temporales */
+#mensaje {
+    left: 10%;
+    top: 68%;
+    width: 55%;
+}
+
+/* =========================================================
+   TABLET HORIZONTAL
+========================================================= */
+
+@media (orientation: landscape) and (max-width: 1200px) {
+
+    #pregunta {
+        left: 9%;
+        top: 27%;
+        width: 57%;
+        height: 23%;
+    }
+
+    #respuestas {
+        left: 12.6%;
+        top: 53.7%;
+        width: 49.4%;
+    }
+
+    .botonRespuesta {
+        height: 11.8vh;
+        font-size: clamp(18px, 2.8vw, 45px);
+    }
+}
+
+
+/* =========================================================
+   AJUSTE FINAL - FONDO 2048 x 1151
+   Esta capa mantiene la imagen completa y adapta los
+   elementos interactivos proporcionalmente a la pantalla.
+========================================================= */
+
+#juego {
+    background-image: url("fondo.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
+}
+
+/* PUNTOS: el texto PUNTOS ya está dentro del fondo */
+#panelPuntos {
+    left: 1.4%;
+    top: 2.7%;
+    width: 15.2%;
+    height: 10.2%;
+}
+
+#textoPuntos {
+    width: 100%;
+    text-align: center;
+    font-size: clamp(22px, 2.5vw, 44px);
+    line-height: 1;
+}
+
+#textoPuntos small {
+    display: none;
+}
+
+/* NIVEL */
+#panelNivel {
+    right: 14.0%;
+    top: 2.7%;
+    width: 12.5%;
+    height: 10.2%;
+    font-size: clamp(22px, 2.5vw, 44px);
+}
+
+/* BOTÓN BLUETOOTH */
+#btnBluetooth {
+    right: 0.8%;
+    top: 3.0%;
+    width: 5.2%;
+}
+
+#estadoBluetooth {
+    right: 0.3%;
+    top: 14.0%;
+    width: 7.5%;
+    font-size: clamp(9px, 0.9vw, 16px);
+}
+
+/* INDICADOR "RESUELVE EL RETO" */
+#tipoPregunta {
+    left: 35%;
+    top: 28.0%;
+    width: 30%;
+    height: 5%;
+    font-size: clamp(13px, 1.6vw, 27px);
+    line-height: 1;
+}
+
+/* PREGUNTA: centrada dentro del panel blanco */
+#pregunta {
+    left: 10.0%;
+    top: 34.0%;
+    width: 59.5%;
+    height: 29.0%;
+    padding: 1% 2.0%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: clamp(20px, 2.15vw, 42px);
+    line-height: 1.15;
+}
+
+/* RESPUESTAS: sobre los 4 botones morados dibujados */
+#respuestas {
+    left: 13.2%;
+    bottom: 19.0%;
+    top: auto;
+    width: 61.2%;
+    gap: 2.1%;
+}
+
+.botonRespuesta {
+    min-height: 0;
+    height: 15.0vh;
+    border-width: 4px;
+    border-radius: 20px;
+    font-size: clamp(22px, 2.7vw, 50px);
+}
+
+/* PANEL TU MISIÓN */
+#panelMision {
+    right: 2.2%;
+    top: 31.0%;
+    width: 15.0%;
+    height: 36.0%;
+}
+
+.estrellaMision {
+    width: 30%;
+}
+
+#estrella1 {
+    left: 7%;
+    top: 0%;
+}
+
+#estrella2 {
+    left: 7%;
+    top: 32%;
+}
+
+#estrella3 {
+    left: 7%;
+    top: 64%;
+}
+
+/* ERROR: coincide con la luz roja del fondo */
+#errorLuz {
+    right: 5.3%;
+    top: 61.8%;
+    width: 4.6%;
+}
+
+/* MENSAJES */
+#mensaje {
+    left: 10%;
+    top: 72%;
+    width: 61%;
+    font-size: clamp(16px, 1.8vw, 34px);
+}
+
+/* TABLET / PANTALLAS PEQUEÑAS EN HORIZONTAL */
+@media (orientation: landscape) and (max-width: 1200px) {
+    #pregunta {
+        left: 10%;
+        top: 34%;
+        width: 59.5%;
+        height: 29%;
+        font-size: clamp(18px, 2.25vw, 36px);
+    }
+
+    #respuestas {
+        left: 13.2%;
+        bottom: 18.5%;
+        width: 61.2%;
+    }
+
+    .botonRespuesta {
+        height: 14vh;
+        font-size: clamp(18px, 2.8vw, 40px);
+    }
+
+    #panelMision {
+        right: 2.2%;
+        top: 31%;
+        width: 15%;
+        height: 36%;
+    }
+}
+
+/* Teléfonos/tablets en horizontal muy bajos */
+@media (orientation: landscape) and (max-height: 650px) {
+    #pregunta {
+        top: 34%;
+        height: 28%;
+        font-size: clamp(17px, 2vw, 32px);
+    }
+
+    .botonRespuesta {
+        height: 13vh;
+        font-size: clamp(17px, 2.5vw, 34px);
+    }
+
+    #tipoPregunta {
+        top: 28%;
+    }
+}
+
 </style>
 </head>
 
@@ -643,7 +967,7 @@ body {
 <div id="juego">
 
     <!-- Música de fondo -->
-    <audio id="musicaFondo" loop preload="auto">
+    <audio id="musicaFondo" loop autoplay preload="auto">
         <source src="musica.mp3" type="audio/mpeg">
         <source src="fondo.mp3" type="audio/mpeg">
     </audio>
@@ -1478,54 +1802,51 @@ function activarEstrella(nivel) {
 function respuestaIncorrecta() {
 
     /*
-       Si la respuesta es incorrecta,
-       se reinicia completamente el nivel actual.
-       Los puntos de niveles anteriores se conservan.
+       Una respuesta incorrecta significa PERDER la partida.
+       Se reinicia TODO: nivel, puntos y estrellas.
     */
 
     mostrarMensaje(
-        "❌ ¡Respuesta incorrecta! Reiniciando nivel..."
+        "❌ ¡Respuesta incorrecta! Reiniciando misión..."
     );
 
     errorLuz.classList.remove("activo");
-
-    /* Forzar reinicio de la animación */
     void errorLuz.offsetWidth;
-
     errorLuz.classList.add("activo");
 
-    /* Enviar ERROR al ESP32 si está conectado */
+    // Avisar al ESP32 si está conectado.
     enviarBluetooth("ERROR");
 
-    /*
-       Después de mostrar el aviso,
-       vuelve a comenzar el nivel actual.
-    */
     setTimeout(() => {
 
         errorLuz.classList.remove("activo");
-
-        /* Apagar la estrella del nivel que se reinicia */
-        if (nivelActual === 1) {
-            estrella1.classList.remove("activa");
-        }
-
-        if (nivelActual === 2) {
-            estrella2.classList.remove("activa");
-        }
-
-        if (nivelActual === 3) {
-            estrella3.classList.remove("activa");
-        }
-
         mensajeElemento.classList.remove("visible");
 
-        /* Cargar una nueva pregunta del mismo nivel */
+        // Reinicio completo de la partida.
+        nivelActual = 1;
+        puntos = 0;
+        preguntasUsadas = [];
+        juegoTerminado = false;
+
+        puntosElemento.textContent = "0";
+        nivelElemento.textContent = "1 / 3";
+
+        estrella1.classList.remove("activa");
+        estrella2.classList.remove("activa");
+        estrella3.classList.remove("activa");
+
+        pantallaFinal.classList.remove("visible");
+
+        enviarBluetooth("RESET");
+
+        // Comenzar nuevamente desde el nivel 1.
         siguientePregunta();
+
+        // Intentar mantener la música activa.
+        iniciarMusica();
 
     }, 1200);
 }
-
 
 /* =========================================================
    MOSTRAR MENSAJE
@@ -1769,19 +2090,28 @@ async function enviarBluetooth(mensaje) {
 
 const musicaFondo = document.getElementById("musicaFondo");
 musicaFondo.volume = 0.35;
+musicaFondo.autoplay = true;
 
 function iniciarMusica() {
+    if (!musicaFondo) return;
+
     const promesa = musicaFondo.play();
+
     if (promesa !== undefined) {
         promesa.catch(() => {
-            // El navegador puede bloquear el autoplay.
-            // La música comenzará en cuanto el usuario toque/clickee la pantalla.
+            // Algunos navegadores bloquean audio con sonido al abrir
+            // una página. En ese caso se intentará automáticamente
+            // con la primera interacción del usuario.
         });
     }
 }
 
-// Intentar iniciar al cargar y nuevamente con la primera interacción.
-window.addEventListener("load", iniciarMusica);
+// Intentar comenzar inmediatamente al cargar.
+window.addEventListener("load", () => {
+    iniciarMusica();
+});
+
+// Respaldo obligatorio para navegadores que bloquean autoplay con sonido.
 ["click", "touchstart", "keydown"].forEach(evento => {
     document.addEventListener(evento, iniciarMusica, { once: true });
 });
